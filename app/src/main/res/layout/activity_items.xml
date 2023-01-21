@@ -14,14 +14,14 @@
         android:scrollbars="none"
         android:background="@color/white"/>
 
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
+    <ImageView
         android:id="@+id/fab"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
         android:layout_margin="15dp"
         android:elevation="6dp"
-        android:src="@drawable/plus"
+        android:src="@drawable/plus_grey"
         app:pressedTranslationZ="12dp"
         tools:ignore="SpeakableTextPresentCheck" />
 
@@ -29,18 +29,18 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/logoutBtn"
-        android:layout_marginTop="25dp"
-        android:layout_marginRight="20dp"
-        android:layout_gravity="right"
+        android:layout_marginBottom="25dp"
+        android:layout_marginLeft="25dp"
+        android:layout_gravity="bottom|left"
         android:text="Logout"/>
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Email"
-        android:layout_marginTop="5dp"
-        android:layout_marginRight="20dp"
-        android:layout_gravity="right"
+        android:layout_marginBottom="5dp"
+        android:layout_marginLeft="25dp"
+        android:layout_gravity="bottom|left"
         android:id="@+id/emailTv"
         style="@style/TextAppearance.MaterialComponents.Body1"/>
 
