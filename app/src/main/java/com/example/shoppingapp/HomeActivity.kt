@@ -28,6 +28,8 @@ class HomeActivity : AppCompatActivity()  {
     //Database
     private lateinit var database: FirebaseFirestore
 
+    private lateinit var taskList: ArrayList<ToDoItem>
+    private lateinit var adapter: ToDoItemAdapter
 
     @SuppressLint("CutPasteId")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -48,6 +50,7 @@ class HomeActivity : AppCompatActivity()  {
         //currentUser
         var currentUser = firebaseAuth.currentUser
 
+
         loadAllData(currentUser!!.uid.toString())
 
         //Adding
@@ -58,7 +61,7 @@ class HomeActivity : AppCompatActivity()  {
                 return@setOnClickListener binding.editTextTodoItem.setError("Item cannot be empty")
             }
 
-            val taskData = ToDoItem(task, false, currentUser!!.uid)
+            val taskData = ToDoItem(task, false, currentUser.uid)
             val data = hashMapOf(
                 "item_name" to taskData.item_name,
                 "isChecked" to taskData.isChecked,
@@ -74,8 +77,6 @@ class HomeActivity : AppCompatActivity()  {
 
                 }
         }
-
-
     }
 
     private fun loadAllData(UID: String) {
@@ -115,14 +116,17 @@ class HomeActivity : AppCompatActivity()  {
         return true
     }
 
-    fun onTaskDelete(task:ToDoItem){
-        database.collection("all_items").document(task.documentId).delete()
-            .addOnSuccessListener {
-                Toast.makeText(this, "Task Deleted", Toast.LENGTH_SHORT).show()
-            }
-            .addOnFailureListener {
-                Toast.makeText(this, "Error deleting task", Toast.LENGTH_SHORT).show()
-                Log.e("HA", "Error deleting task: ${it.message}")
-            }
+    fun onTaskDelete(task: ToDoItem) {
+        //Remove task from taskList
+        taskList.remove(task)
+        //Notify adapter that data set has changed
+        adapter.notifyDataSetChanged()
+        //Delete task from database
+        val docRef = task.documentId?.let { database.collection("all_items").document(it) }
+        docRef?.delete()?.addOnSuccessListener {
+            Toast.makeText(this, "Task removed successfully", Toast.LENGTH_SHORT).show()
+        }?.addOnFailureListener {
+            Toast.makeText(this, "Error removing task: ${it.message}", Toast.LENGTH_SHORT).show()
+        }
     }
-    }
+}
