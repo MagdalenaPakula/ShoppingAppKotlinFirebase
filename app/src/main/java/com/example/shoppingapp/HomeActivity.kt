@@ -1,17 +1,22 @@
 package com.example.shoppingapp
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.view.Menu
+import android.view.View
+import android.widget.Button
+import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.ActionBar
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.example.shoppingapp.databinding.ActivityHomeBinding
-import com.google.android.material.textfield.TextInputEditText
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 
-class HomeActivity : AppCompatActivity(), AddTodoPopupFragment.DialogNextBtnClickListener {
+class HomeActivity : AppCompatActivity(), View.OnClickListener  {
 
     //viewBinding
     private lateinit var binding: ActivityHomeBinding
@@ -23,12 +28,14 @@ class HomeActivity : AppCompatActivity(), AddTodoPopupFragment.DialogNextBtnClic
     private lateinit var firebaseAuth: FirebaseAuth
 
     //Database
-    private lateinit var databaseRef: DatabaseReference
+    //private lateinit var database: FirebaseDatabase
+    //init firebase database
+    val database = FirebaseDatabase.getInstance()
+    val myRef = database.getReference("todo-list")
+    var todos: ArrayList<ToDoItem?> = ArrayList()
+    val adapter = ToDoAdapter(todos, this, myRef)
 
-    //AddPopUp
-    private lateinit var popUpFragment: AddTodoPopupFragment
-
-
+    @SuppressLint("CutPasteId")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityHomeBinding.inflate(layoutInflater)
@@ -42,19 +49,34 @@ class HomeActivity : AppCompatActivity(), AddTodoPopupFragment.DialogNextBtnClic
         firebaseAuth = FirebaseAuth.getInstance()
         checkUser()
 
-        //init firebase database
-        databaseRef = FirebaseDatabase.getInstance().reference.child("Tasks").child(firebaseAuth.currentUser?.uid.toString())
+//        //init firebase database
+//        database = FirebaseDatabase.getInstance()
+//        val myRef = database.getReference("todo-list")
+//        var todos: ArrayList<ToDoItem?> = ArrayList()
+//        val adapter = ToDoAdapter(todos, this, myRef)
 
-        //handle logout
-        binding.logoutBtn.setOnClickListener {
+        //Adding
+        findViewById<Button>(R.id.button_add_todo).setOnClickListener(this)
+
+        // initialise recycler view
+        findViewById<RecyclerView>(R.id.recyclerView_todo_list).layoutManager = LinearLayoutManager(this)
+        findViewById<RecyclerView>(R.id.recyclerView_todo_list).adapter = adapter
+    }
+
+    //Handle logout in ActionBar
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.main_menu, menu)
+        val logoutMenuItem = menu?.findItem(R.id.logoutBtn)
+        logoutMenuItem?.setOnMenuItemClickListener {
             firebaseAuth.signOut()
             checkUser()
+            true
         }
-        //Adding
-        registerEvents()
+        return true
     }
+
+    //Check if user is logged in
     private fun checkUser() {
-        //check if user is logged in
         val firebaseUser = firebaseAuth.currentUser
         if (firebaseUser != null) {
             //ok
@@ -65,26 +87,37 @@ class HomeActivity : AppCompatActivity(), AddTodoPopupFragment.DialogNextBtnClic
             finish()
         }
     }
-    private fun registerEvents(){
-        binding.addBtnHome.setOnClickListener{
-            popUpFragment = AddTodoPopupFragment()
-            popUpFragment.setListener(this)
-            popUpFragment.show(supportFragmentManager, "AddTodoPopupFragment")
 
-        }
-    }
+    @SuppressLint("NotifyDataSetChanged")
+    override fun onClick(view: View?) {
 
-    override fun onSaveTask(todo: String, todoEt: TextInputEditText) {
-        databaseRef.push().setValue(todo).addOnCompleteListener{
-            if(it.isSuccessful){
-                Toast.makeText(this,"Todo saved successfully", Toast.LENGTH_SHORT).show()
-                todoEt.text = null
+        when (view?.id) {
+            // add item button action
+            R.id.button_add_todo -> {
+                val level = findViewById<EditText>(R.id.editText_todo_item).text.toString()
+                if (level.isNotEmpty()) {
 
-            }else{
-                Toast.makeText(this, it.exception?.message, Toast.LENGTH_SHORT).show()
+                    val id: String = myRef.push().key.toString()
+
+                    val todoItem = ToDoItem(id, level)
+
+                    findViewById<EditText>(R.id.editText_todo_item).setText("")
+
+                    //save data on firebase
+                    myRef.child(id).setValue(todoItem)
+
+                    todos.add(todoItem)
+                    adapter.notifyDataSetChanged()
+
+                    Toast.makeText(
+                        applicationContext,
+                        "Item Added successfully",
+                        Toast.LENGTH_LONG
+                    ).show()
+                }
             }
-            popUpFragment.dismiss()
-
         }
     }
+
+
 }
