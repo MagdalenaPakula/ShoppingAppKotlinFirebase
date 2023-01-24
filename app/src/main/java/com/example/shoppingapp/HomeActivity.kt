@@ -82,7 +82,9 @@ class HomeActivity : AppCompatActivity()  {
 
         val taskList = ArrayList<ToDoItem>()
         var ref = database.collection("all_items")
-        ref.get().addOnSuccessListener {
+        ref.whereEqualTo("UID", UID)
+            .get().
+            addOnSuccessListener {
             if(it.isEmpty){
                 Toast.makeText(this@HomeActivity, "No task found", Toast.LENGTH_SHORT).show()
                 return@addOnSuccessListener
@@ -96,8 +98,6 @@ class HomeActivity : AppCompatActivity()  {
                 adapter = ToDoItemAdapter(taskList, this@HomeActivity)
             }
         }
-
-
 
     }
 
@@ -115,4 +115,14 @@ class HomeActivity : AppCompatActivity()  {
         return true
     }
 
-}
+    fun onTaskDelete(task:ToDoItem){
+        database.collection("all_items").document(task.documentId).delete()
+            .addOnSuccessListener {
+                Toast.makeText(this, "Task Deleted", Toast.LENGTH_SHORT).show()
+            }
+            .addOnFailureListener {
+                Toast.makeText(this, "Error deleting task", Toast.LENGTH_SHORT).show()
+                Log.e("HA", "Error deleting task: ${it.message}")
+            }
+    }
+    }

@@ -20,6 +20,7 @@ class ToDoItemAdapter(val taskList: ArrayList<ToDoItem>, val context: Context) :
             binding.tvTaskName.text = task.item_name
             binding.chBox.isChecked= task.isChecked
         }
+
     }
 
     override fun getItemCount(): Int {
