@@ -1,12 +1,15 @@
 package com.example.shoppingapp
 
 import android.annotation.SuppressLint
+import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.view.Menu
 import android.widget.Toast
 import androidx.appcompat.app.ActionBar
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.example.shoppingapp.databinding.ActivityHomeBinding
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -44,6 +47,9 @@ class HomeActivity : AppCompatActivity()  {
 
         //currentUser
         var currentUser = firebaseAuth.currentUser
+
+        loadAllData(currentUser!!.uid.toString())
+
         //Adding
         binding.buttonAddTodo.setOnClickListener{
             var task = binding.editTextTodoItem.text.toString().trim()
@@ -68,6 +74,31 @@ class HomeActivity : AppCompatActivity()  {
 
                 }
         }
+
+
+    }
+
+    private fun loadAllData(UID: String) {
+
+        val taskList = ArrayList<ToDoItem>()
+        var ref = database.collection("all_items")
+        ref.get().addOnSuccessListener {
+            if(it.isEmpty){
+                Toast.makeText(this@HomeActivity, "No task found", Toast.LENGTH_SHORT).show()
+                return@addOnSuccessListener
+            }
+            for(doc in it){
+                val todoitem = doc.toObject(ToDoItem::class.java)
+                taskList.add(todoitem)
+            }
+            binding.recyclerViewTodoList.apply {
+                layoutManager = LinearLayoutManager(this@HomeActivity, RecyclerView.VERTICAL, false)
+                adapter = ToDoItemAdapter(taskList, this@HomeActivity)
+            }
+        }
+
+
+
     }
 
     //Handle logout in ActionBar
@@ -76,6 +107,9 @@ class HomeActivity : AppCompatActivity()  {
         val logoutMenuItem = menu?.findItem(R.id.logoutBtn)
         logoutMenuItem?.setOnMenuItemClickListener {
             firebaseAuth.signOut()
+            val intent = Intent(this, LoginActivity::class.java)
+            startActivity(intent)
+            finish()
             true
         }
         return true
