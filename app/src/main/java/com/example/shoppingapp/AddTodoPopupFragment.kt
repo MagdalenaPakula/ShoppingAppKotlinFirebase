@@ -42,7 +42,7 @@ class AddTodoPopupFragment : DialogFragment() {
                 listener.onSaveTask(todoTask, binding.todoEt)
 
             }else{
-                Toast.makeText(requireContext(), "Please type some text", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, "Please type some text", Toast.LENGTH_SHORT).show()
             }
 
         }

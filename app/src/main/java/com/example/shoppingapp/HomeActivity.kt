@@ -43,8 +43,7 @@ class HomeActivity : AppCompatActivity(), AddTodoPopupFragment.DialogNextBtnClic
         checkUser()
 
         //init firebase database
-        databaseRef = FirebaseDatabase.getInstance().reference
-            .child("Tasks").child(firebaseAuth.currentUser?.uid.toString())
+        databaseRef = FirebaseDatabase.getInstance().reference.child("Tasks").child(firebaseAuth.currentUser?.uid.toString())
 
         //handle logout
         binding.logoutBtn.setOnClickListener {
@@ -78,11 +77,11 @@ class HomeActivity : AppCompatActivity(), AddTodoPopupFragment.DialogNextBtnClic
     override fun onSaveTask(todo: String, todoEt: TextInputEditText) {
         databaseRef.push().setValue(todo).addOnCompleteListener{
             if(it.isSuccessful){
-                Toast.makeText(applicationContext,"Todo saved successfully", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this,"Todo saved successfully", Toast.LENGTH_SHORT).show()
                 todoEt.text = null
 
             }else{
-                Toast.makeText(applicationContext, it.exception?.message, Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, it.exception?.message, Toast.LENGTH_SHORT).show()
             }
             popUpFragment.dismiss()
 
