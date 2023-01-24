@@ -1,8 +1,3 @@
 package com.example.shoppingapp
 
-data class ToDoItem (var id:String="" , var level:String="", var status:Boolean=false){
-
-    fun statusChanged(){
-        status=!status
-    }
-}
+class ToDoItem (val item_name:String, val isChecked: Boolean, val UID: String)
